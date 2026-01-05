@@ -1,1 +1,6 @@
 fastapi[standard]
+paddleocr
+paddlepaddle
+chromadb
+transformers>=4.51.0
+sentence-transformers>=2.7.0
