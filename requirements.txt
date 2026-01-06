@@ -1,6 +1,12 @@
 fastapi[standard]
-paddleocr
-paddlepaddle
 chromadb
-transformers>=4.51.0
-sentence-transformers>=2.7.0
+transformers
+llama-index
+langchain
+langchain-chroma
+langchain-huggingface
+langchain-openai
+sentence-transformers
+langchain-text-splitters
+langchain-community
+jq
