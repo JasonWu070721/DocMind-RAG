@@ -1,44 +1,47 @@
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+
 from core.llm.local_llm import get_llm
 from core.vectorstore.chroma_store import get_vectorstore
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import JSONLoader
 
-md_text = r"D:/github/DocMind-RAG/core/ocr/output/print-tech-outlier-01-001_res.json"
+def format_docs(docs):
+    return "\n\n".join(d.page_content for d in docs)
 
-jq_schema = (
-    '.parsing_res_list[] '
-    '| select(.block_label == "text" or .block_label == "table")'
-)
+def answer(query: str) -> str:
+    # Vector store & retriever
+    vs = get_vectorstore()
+    retriever = vs.as_retriever(search_kwargs={"k": 4})
 
-loader = JSONLoader(
-    file_path=md_text,
-    jq_schema=jq_schema,
-    text_content=False,
-)
+    # LLM
+    llm = get_llm()
 
-documents = loader.load()
+    # Prompt
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You are a helpful assistant. "
+                "Use the provided context to answer the question. "
+                "If the answer is not in the context, say you don't know.\n\n"
+                "Context:\n{context}"
+            ),
+            ("human", "{input}"),
+        ]
+    )
 
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=800,
-    chunk_overlap=150,
-)
+    rag_chain = (
+        {
+            "context": retriever | format_docs,
+            "input": RunnablePassthrough(),
+        }
+        | prompt
+        | llm
+        | StrOutputParser()
+    )
 
-chunks = text_splitter.split_documents(documents)
+    return rag_chain.invoke(query)
 
-vector_store = get_vectorstore()
-print(vector_store)
-vector_store.add_documents(chunks)
-vector_store.persist()
 
-exit()
-
-# messages = [
-#     (
-#         "system",
-#         "You are a helpful assistant that translates English to French. Translate the user sentence.",
-#     ),
-#     ("human", "I love programming."),
-# ]
-# llm = get_llm()
-# ai_msg = llm.invoke(messages)
-# print(ai_msg)
+if __name__ == "__main__":
+    print(answer("block_content"))
