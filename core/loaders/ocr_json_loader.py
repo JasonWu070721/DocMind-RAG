@@ -1,6 +1,7 @@
 from langchain_community.document_loaders import JSONLoader
 
 def load_ocr_json(path: str):
+    print("run load_ocr_json")
     jq_schema = """
     .parsing_res_list[]
     | select(.block_label == "text" or .block_label == "table")
