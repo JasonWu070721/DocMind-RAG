@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 from apps.api.routes import rag
+from apps.api.routes import openai
 from core.llm.local_llm import get_llm
 from core.vectorstore.chroma_store import get_vectorstore
 
@@ -32,6 +33,7 @@ app = FastAPI(
 )
 
 app.include_router(rag.router)
+app.include_router(openai.router)
 
 
 @app.get("/health")
