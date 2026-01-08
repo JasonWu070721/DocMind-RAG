@@ -1,18 +1,28 @@
+import os
 import logging
+from chromadb import HttpClient
 from langchain_chroma import Chroma
 from core.embeddings.qwen_embedding import get_embedding
 
 logger = logging.getLogger(__name__)
-_vectorstore = None
 
-def get_vectorstore():
-    global _vectorstore
-    if _vectorstore is None:
-        logger.info("Initializing Chroma vectorstore")
-        _vectorstore=  Chroma(
-            collection_name="docmind_db",
-            embedding_function=get_embedding(),
-            persist_directory="./data/chroma_langchain_db"
-        )
-        logger.info("Vectorstore ready")
-    return _vectorstore
+def get_vectorstore() -> Chroma:
+    """
+    Get Chroma vectorstore via HTTP client (remote Chroma server)
+    """
+
+    logger.info("Connecting to remote Chroma server")
+
+    client = HttpClient(
+        host=os.getenv("CHROMA_HOST", "192.168.60.190"),
+        port=int(os.getenv("CHROMA_PORT", "8010")),
+    )
+
+    vectorstore = Chroma(
+        client=client,
+        collection_name=os.getenv("CHROMA_COLLECTION", "docmind_db"),
+        embedding_function=get_embedding(),
+    )
+
+    logger.info("Chroma vectorstore ready (remote)")
+    return vectorstore

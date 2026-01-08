@@ -1,0 +1,60 @@
+.git
+.gitignore
+
+# Local env and secrets
+.env
+.env.*
+.envrc
+.env.local
+
+# Virtualenvs
+.venv
+.venv*
+.venv-paddleocr
+env/
+venv/
+ENV/
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.so
+*.egg-info/
+build/
+dist/
+.eggs/
+*.egg
+
+# Tooling caches
+.cache/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.tox/
+.nox/
+.pdm-python
+.pdm-build/
+.pixi/
+
+# Data and notebooks (mounted via volumes)
+data/
+*.ipynb
+.ipynb_checkpoints/
+
+# Logs and local DBs
+*.log
+*.sqlite3
+*.db
+
+# Docs, tests, scripts (not needed for runtime image)
+docs/
+tests/
+scripts/
+
+# IDE/editor files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
