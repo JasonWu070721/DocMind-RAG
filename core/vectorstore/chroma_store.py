@@ -14,7 +14,7 @@ def get_vectorstore() -> Chroma:
     logger.info("Connecting to remote Chroma server")
 
     client = HttpClient(
-        host=os.getenv("CHROMA_HOST", "192.168.60.190"),
+        host=os.getenv("CHROMA_HOST", "192.168.80.190"),
         port=int(os.getenv("CHROMA_PORT", "8010")),
     )
 

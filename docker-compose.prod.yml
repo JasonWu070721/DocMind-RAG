@@ -17,7 +17,7 @@ services:
       LLM_MAX_TOKENS: "1024"
 
       # ===== Vector DB (REMOTE) =====
-      CHROMA_HOST: "192.168.60.190"
+      CHROMA_HOST: "192.168.80.190"
       CHROMA_PORT: "8010"
       CHROMA_COLLECTION: "docmind_db"
 

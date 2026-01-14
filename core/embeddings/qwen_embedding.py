@@ -17,7 +17,7 @@ def get_embedding():
 
         base_url = os.environ.get(
             "EMBEDDING_BASE_URL",
-            "http://192.168.60.190:8003/v1",
+            "http://192.168.80.190:8003/v1",
         )
         model_name = os.environ.get(
             "EMBEDDING_MODEL_NAME",
