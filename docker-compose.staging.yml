@@ -5,7 +5,7 @@ services:
     build:
       context: .
     ports:
-      - "8000:8000"
+      - "9000:8000"
     environment:
       # ===== LLM =====
       OPENAI_BASE_URL: "http://192.168.60.190:8033/v1"
@@ -24,11 +24,5 @@ services:
       # ===== Embedding =====
       EMBEDDING_BASE_URL: "http://192.168.60.190:8003/v1"
       EMBEDDING_MODEL_NAME: "Qwen/Qwen3-Embedding-8B"
-      
-      # ===== Retrieval tuning =====
-      VECTOR_K: "8"
-      BM25_K: "8"
-      RERANK_K: "6"
-      BM25_REFRESH: "0"
 
     restart: unless-stopped
