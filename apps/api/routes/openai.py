@@ -1,9 +1,11 @@
+import json
 import logging
 import time
 import uuid
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from core.embeddings.qwen_embedding import get_embedding
@@ -97,6 +99,11 @@ def _extract_user_prompt(messages: List[ChatMessage]) -> str:
                 return content
     raise HTTPException(status_code=400, detail="No user message found in messages.")
 
+def _chunk_text(text: str, size: int = 20) -> List[str]:
+    if size <= 0:
+        return [text]
+    return [text[i:i + size] for i in range(0, len(text), size)]
+
 
 @router.get("/models")
 def list_models():
@@ -120,9 +127,6 @@ def list_models():
 
 @router.post("/chat/completions", response_model=ChatCompletionResponse)
 def chat_completions(payload: ChatCompletionRequest):
-    if payload.stream:
-        raise HTTPException(status_code=400, detail="Streaming is not supported.")
-
     prompt = _extract_user_prompt(payload.messages)
     logger.debug("OpenAI chat completions prompt: %s", prompt)
 
@@ -131,6 +135,42 @@ def chat_completions(payload: ChatCompletionRequest):
     created = int(time.time())
     request_id = f"chatcmpl-{uuid.uuid4().hex}"
     choice_count = max(int(payload.n or 1), 1)
+
+    if payload.stream:
+        def event_stream():
+            for chunk in _chunk_text(response_text):
+                chunk_payload = {
+                    "id": request_id,
+                    "object": "chat.completion.chunk",
+                    "created": created,
+                    "model": model_name,
+                    "choices": [
+                        {
+                            "index": 0,
+                            "delta": {"content": chunk},
+                            "finish_reason": None,
+                        }
+                    ],
+                }
+                yield f"data: {json.dumps(chunk_payload, ensure_ascii=True)}\n\n"
+
+            final_payload = {
+                "id": request_id,
+                "object": "chat.completion.chunk",
+                "created": created,
+                "model": model_name,
+                "choices": [
+                    {
+                        "index": 0,
+                        "delta": {},
+                        "finish_reason": "stop",
+                    }
+                ],
+            }
+            yield f"data: {json.dumps(final_payload, ensure_ascii=True)}\n\n"
+            yield "data: [DONE]\n\n"
+
+        return StreamingResponse(event_stream(), media_type="text/event-stream")
 
     choices = [
         ChatCompletionChoice(

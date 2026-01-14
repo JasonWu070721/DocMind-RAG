@@ -1,2 +1,0 @@
-paddleocr[doc-parser]
-pymarkdownlnt
